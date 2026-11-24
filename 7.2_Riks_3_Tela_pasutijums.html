@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="lv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7.2 Tēla pasūtījums – interaktīvs rīks</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0b2a23;font-family:Candara,"Segoe UI","Trebuchet MS",Verdana,sans-serif;color:#12332b}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1600px;height:900px;flex:none;transform-origin:center center;background:#f6f7f4;position:relative;overflow:hidden;display:flex;flex-direction:column}
+header.top{height:74px;flex:none;background:#006751;color:#fff;display:flex;align-items:center;padding:0 28px;gap:20px}
+header.top .tema{background:#dbe68d;color:#12332b;font-weight:700;border-radius:8px;padding:6px 14px;font-size:22px;white-space:nowrap}
+header.top h1{font-size:34px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+header.top .sub{font-size:21px;opacity:.92;margin-left:auto;text-align:right;line-height:1.15;max-width:760px}
+main{flex:1;min-height:0;position:relative;padding:18px 28px 10px}
+footer.bot{height:62px;flex:none;display:flex;align-items:center;gap:14px;padding:0 28px 8px;}
+footer.bot .info{font-size:20px;color:#3d5a52;flex:1;min-width:0}
+button{font-family:inherit;cursor:pointer}
+.btn{border:0;border-radius:12px;background:#006751;color:#fff;font-size:24px;font-weight:700;padding:11px 22px;min-height:50px;box-shadow:0 2px 0 #00483a;transition:transform .06s,background .15s}
+.btn:hover{background:#00795f}.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.sec{background:#dedfe0;color:#12332b;box-shadow:0 2px 0 #b9bbbd}.btn.sec:hover{background:#d0d2d4}
+.btn.lime{background:#dbe68d;color:#12332b;box-shadow:0 2px 0 #b4c05e}.btn.lime:hover{background:#d2e070}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.fs{background:#fff;color:#006751;border:2px solid #006751;box-shadow:none;font-size:20px;padding:8px 16px;min-height:44px;margin-left:auto;white-space:nowrap}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,60,45,.13)}
+.pill{display:inline-block;background:#dbe68d;border-radius:999px;padding:4px 16px;font-size:21px;font-weight:700}
+.ok{color:#11703f}.bad{color:#b3261e}
+.fb{font-size:23px;line-height:1.3;border-radius:14px;padding:14px 18px;background:#eef3e0;border-left:8px solid #006751}
+.fb.bad{background:#fdecea;border-left-color:#b3261e;color:#5f1611}
+.fb.okb{background:#e3f4e8;border-left-color:#11703f;color:#0d4a2b}
+.src{font-size:15px;color:#6a7f78}
+.hidden{display:none!important}
+
+.tm{display:flex;flex-direction:column;gap:10px;align-items:center}
+.tm-lab{font-size:21px;color:#3d5a52;display:flex;align-items:center;gap:8px}
+.tm-in{font:inherit;font-size:26px;font-weight:700;width:92px;height:46px;text-align:center;border:3px solid #006751;border-radius:10px;color:#12332b;background:#fff}
+.tm-row{display:flex;gap:10px;align-items:center;justify-content:center}
+.tm-disp{font-size:74px;font-weight:700;color:#006751;min-width:210px;text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.tm-disp.tm-end{color:#b3261e}
+
+.tm-row .btn{font-size:21px;padding:9px 14px;white-space:nowrap}
+.tm-s{font-size:34px;width:58px;padding:0;min-height:58px}
+</style></head>
+<body><div id="wrap"><div id="stage">
+<header class="top"><span class="tema">7.2</span><h1>Tēla pasūtījums</h1><div class="sub">Darbs grupās ar papīru un zīmuli. Laiku iestata skolotājs.</div></header>
+<style>
+main{display:grid;grid-template-columns:1fr 430px;gap:22px}
+.left{display:flex;flex-direction:column;gap:14px;min-height:0}
+.slots{display:grid;gap:14px}
+.slot{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,60,45,.13);padding:12px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.slot h3{font-size:22px;color:#006751;text-transform:uppercase;letter-spacing:.5px}
+.slot img{width:100%;height:190px;object-fit:cover;border-radius:10px;display:block}
+.slot .val{font-size:27px;font-weight:700;line-height:1.12;min-height:62px;display:flex;align-items:center}
+.slot .val.big{font-size:30px;min-height:120px}
+.slot .d{font-size:19px;color:#3d5a52;line-height:1.2}
+.slot .btn{font-size:19px;padding:6px 12px;min-height:40px;align-self:flex-start;margin-top:auto}
+.steps{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,60,45,.13);padding:14px 20px;flex:1;min-height:0}
+.steps h3,.crit h3{font-size:24px;color:#006751;margin-bottom:6px}
+.steps ol{padding-left:34px;font-size:27px;line-height:1.35}
+.right{display:flex;flex-direction:column;gap:14px}
+.crit{background:#eef3e0;border-radius:16px;padding:14px 18px;flex:1}
+.crit ul{padding-left:26px;font-size:24px;line-height:1.3}
+.tbox{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,60,45,.13);padding:14px}
+.roll{animation:rl .35s}@keyframes rl{0%{opacity:.2;transform:translateY(-8px)}100%{opacity:1;transform:none}}
+</style>
+<main>
+  <div class="left">
+    <div class="slots" id="slots"></div>
+    <div class="steps"><h3 id="st"></h3><ol id="steps"></ol></div>
+  </div>
+  <div class="right">
+    <div class="tbox" id="tm"></div>
+    <div class="crit"><h3 id="ct"></h3><ul id="crit"></ul></div>
+    <button class="btn lime" id="draw" style="font-size:28px">Izlozēt jaunu uzdevumu</button>
+  </div>
+</main>
+<footer class="bot">
+  <div class="info">Labs tēls ir atpazīstams jau pēc silueta.</div>
+  <button class="btn fs" id="fsbtn"></button>
+</footer>
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  function fit(){var s=Math.min(window.innerWidth/1600,window.innerHeight/900);stage.style.transform='scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  var fsb=document.getElementById('fsbtn');
+  function isFs(){return document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement;}
+  function upd(){if(fsb)fsb.textContent=isFs()?'⛶ Aizvērt pilnekrāna režīmu':'⛶ Atvērt pilnekrāna režīmu';fit();}
+  if(fsb)fsb.addEventListener('click',function(){
+    var d=document.documentElement;
+    if(!isFs()){var f=d.requestFullscreen||d.webkitRequestFullscreen||d.msRequestFullscreen;if(f){try{var p=f.call(d);if(p&&p.catch)p.catch(function(){});}catch(e){}}}
+    else{var x=document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen;if(x)x.call(document);}
+  });
+  ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(function(e){document.addEventListener(e,upd);});
+  upd();
+  window.U={
+    shuffle:function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;},
+    el:function(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==='class')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else if(k==='text')e.textContent=attrs[k];else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k]);}
+      (kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==='string'?document.createTextNode(c):c);});return e;},
+    $:function(s){return document.querySelector(s);},
+    scale:function(){return Math.min(window.innerWidth/1600,window.innerHeight/900);},
+    /* Taimeris: mount(el,{min:5}) -> pogas Sākt / Apturēt, laiku iestata skolotājs */
+    timer:function(host,opt){
+      opt=opt||{};var total=(opt.min||5)*60,left=total,run=false,iv=null;
+      var disp=U.el('div',{class:'tm-disp'});var minus=U.el('button',{class:'btn sec tm-s',text:'−'});var plus=U.el('button',{class:'btn sec tm-s',text:'+'});
+      var start=U.el('button',{class:'btn',text:'Sākt'});var stop=U.el('button',{class:'btn sec',text:'Apturēt'});var reset=U.el('button',{class:'btn sec',text:'No sākuma'});
+      var inp=U.el('input',{type:'number',min:'1',max:'90',value:String(opt.min||5),class:'tm-in','aria-label':'Laiks minūtēs'});
+      var lab=U.el('div',{class:'tm-lab'},['Laiks minūtēs: ',inp]);
+      function fromInp(){if(run)return;var v=parseInt(inp.value,10);if(isNaN(v))return;v=Math.max(1,Math.min(90,v));total=v*60;left=total;draw();}
+      inp.addEventListener('input',fromInp);inp.addEventListener('change',function(){fromInp();inp.value=Math.round(total/60);});
+      function fmt(s){var m=Math.floor(s/60),x=s%60;return m+':'+(x<10?'0':'')+x;}
+      function draw(){disp.textContent=fmt(left);disp.classList.toggle('tm-end',left===0);start.disabled=run||left===0;stop.disabled=!run;minus.disabled=run;plus.disabled=run;inp.disabled=run;}
+      function halt(){run=false;if(iv){clearInterval(iv);iv=null;}draw();}
+      minus.onclick=function(){if(run)return;total=Math.max(60,total-60);left=total;inp.value=Math.round(total/60);draw();};
+      plus.onclick=function(){if(run)return;total=Math.min(90*60,total+60);left=total;inp.value=Math.round(total/60);draw();};
+      start.onclick=function(){if(run||left===0)return;run=true;iv=setInterval(function(){left--;if(left<=0){left=0;halt();if(opt.onEnd)opt.onEnd();}draw();},1000);draw();};
+      stop.onclick=halt;reset.onclick=function(){halt();left=total;draw();};
+      host.appendChild(U.el('div',{class:'tm'},[lab,U.el('div',{class:'tm-row'},[minus,disp,plus]),U.el('div',{class:'tm-row'},[start,stop,reset])]));
+      draw();return {reset:function(){halt();left=total;draw();}};
+    }
+  };
+})();
+
+(function(){
+var D={"min": 10, "critTitle": "Pārbaudiet savu siluetu", "slots": [{"t": "Tēla loma", "items": [{"t": "Sargs"}, {"t": "Vēstnesis"}, {"t": "Dziednieks"}, {"t": "Viltnieks"}, {"t": "Ceļotāju palīgs"}, {"t": "Dabas saimnieks"}]}, {"t": "Trīs īpašības", "items": [{"t": "Stiprs, lēns, uzticams"}, {"t": "Ātrs, viegls, bailīgs"}, {"t": "Gudrs, vecs, pacietīgs"}, {"t": "Viltīgs, lokans, kluss"}, {"t": "Draudzīgs, apaļīgs, ziņkārīgs"}, {"t": "Bīstams, ass, modrs"}]}, {"t": "Dzīvesvieta", "items": [{"t": "Purvs"}, {"t": "Mežs"}, {"t": "Jūras krasts"}, {"t": "Pilsētas jumti"}, {"t": "Pazeme"}, {"t": "Mākoņi"}]}], "steps": ["Izlemiet, kuru būtņu vai lietu daļas savienosiet (sintēze).", "Izvēlieties vienu daļu, ko pārspīlēsiet (hiperbolizācija).", "Uz papīra uzzīmējiet tēlu un aizkrāsojiet to pilnībā melnu – paliek tikai siluets.", "Parādiet siluetu klasei. Klase min tēla īpašības, jūs nosaucat izlozētās īpašības."], "crit": ["Tēlu var saprast bez iekšējām detaļām.", "Savienotas vismaz divu būtņu daļas.", "Viena daļa ir skaidri pārspīlēta.", "Forma atbilst raksturam: asas formas – bīstams, apaļas – draudzīgs."]};
+var slots=U.$('#slots');slots.style.gridTemplateColumns='repeat('+D.slots.length+',1fr)';
+var els=[],last=[];
+D.slots.forEach(function(s,k){var img=s.items[0].img?U.el('img',{alt:''}):null;var val=U.el('div',{class:'val'+(img?'':' big')});var d=U.el('div',{class:'d'});
+  var b=U.el('button',{class:'btn sec',text:'Mainīt tikai šo'});b.onclick=function(){draw(k)};
+  slots.appendChild(U.el('div',{class:'slot'},[U.el('h3',{text:s.t}),img,val,d,b]));els.push({img:img,val:val,d:d});last.push(-1);});
+function draw(k){var s=D.slots[k],n;do{n=Math.floor(Math.random()*s.items.length)}while(s.items.length>1&&n===last[k]);last[k]=n;var it=s.items[n],e=els[k];
+  if(e.img)e.img.src=it.img;e.val.textContent=it.t;e.d.textContent=it.d||'';e.val.classList.remove('roll');void e.val.offsetWidth;e.val.classList.add('roll');}
+function all(){D.slots.forEach(function(s,k){draw(k)});}
+U.$('#st').textContent=D.stepsTitle||'Darba gaita';D.steps.forEach(function(t){U.$('#steps').appendChild(U.el('li',{html:t}))});
+U.$('#ct').textContent=D.critTitle||'Pārbaudiet savu skici';D.crit.forEach(function(t){U.$('#crit').appendChild(U.el('li',{html:t}))});
+U.timer(U.$('#tm'),{min:D.min||10});
+U.$('#draw').onclick=all;all();
+})();
+</script>
+
+</div></div></body></html>

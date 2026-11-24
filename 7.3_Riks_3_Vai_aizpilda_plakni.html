@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="lv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7.3 Vai aizpilda plakni? – interaktīvs rīks</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0b2a23;font-family:Candara,"Segoe UI","Trebuchet MS",Verdana,sans-serif;color:#12332b}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1600px;height:900px;flex:none;transform-origin:center center;background:#f6f7f4;position:relative;overflow:hidden;display:flex;flex-direction:column}
+header.top{height:74px;flex:none;background:#006751;color:#fff;display:flex;align-items:center;padding:0 28px;gap:20px}
+header.top .tema{background:#dbe68d;color:#12332b;font-weight:700;border-radius:8px;padding:6px 14px;font-size:22px;white-space:nowrap}
+header.top h1{font-size:34px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+header.top .sub{font-size:21px;opacity:.92;margin-left:auto;text-align:right;line-height:1.15;max-width:760px}
+main{flex:1;min-height:0;position:relative;padding:18px 28px 10px}
+footer.bot{height:62px;flex:none;display:flex;align-items:center;gap:14px;padding:0 28px 8px;}
+footer.bot .info{font-size:20px;color:#3d5a52;flex:1;min-width:0}
+button{font-family:inherit;cursor:pointer}
+.btn{border:0;border-radius:12px;background:#006751;color:#fff;font-size:24px;font-weight:700;padding:11px 22px;min-height:50px;box-shadow:0 2px 0 #00483a;transition:transform .06s,background .15s}
+.btn:hover{background:#00795f}.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.sec{background:#dedfe0;color:#12332b;box-shadow:0 2px 0 #b9bbbd}.btn.sec:hover{background:#d0d2d4}
+.btn.lime{background:#dbe68d;color:#12332b;box-shadow:0 2px 0 #b4c05e}.btn.lime:hover{background:#d2e070}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.fs{background:#fff;color:#006751;border:2px solid #006751;box-shadow:none;font-size:20px;padding:8px 16px;min-height:44px;margin-left:auto;white-space:nowrap}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,60,45,.13)}
+.pill{display:inline-block;background:#dbe68d;border-radius:999px;padding:4px 16px;font-size:21px;font-weight:700}
+.ok{color:#11703f}.bad{color:#b3261e}
+.fb{font-size:23px;line-height:1.3;border-radius:14px;padding:14px 18px;background:#eef3e0;border-left:8px solid #006751}
+.fb.bad{background:#fdecea;border-left-color:#b3261e;color:#5f1611}
+.fb.okb{background:#e3f4e8;border-left-color:#11703f;color:#0d4a2b}
+.src{font-size:15px;color:#6a7f78}
+.hidden{display:none!important}
+
+.tm{display:flex;flex-direction:column;gap:10px;align-items:center}
+.tm-lab{font-size:21px;color:#3d5a52;display:flex;align-items:center;gap:8px}
+.tm-in{font:inherit;font-size:26px;font-weight:700;width:92px;height:46px;text-align:center;border:3px solid #006751;border-radius:10px;color:#12332b;background:#fff}
+.tm-row{display:flex;gap:10px;align-items:center;justify-content:center}
+.tm-disp{font-size:74px;font-weight:700;color:#006751;min-width:210px;text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.tm-disp.tm-end{color:#b3261e}
+
+.tm-row .btn{font-size:21px;padding:9px 14px;white-space:nowrap}
+.tm-s{font-size:34px;width:58px;padding:0;min-height:58px}
+</style></head>
+<body><div id="wrap"><div id="stage">
+<header class="top"><span class="tema">7.3</span><h1>Vai aizpilda plakni?</h1><div class="sub">Izvēlies figūru un ieliec to pareizajā laukā. Rīks parādīs, kā figūra klājas.</div></header>
+
+<style>
+main{display:grid;grid-template-columns:900px 1fr;gap:22px}
+.tray{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sc{background:#fff;border:3px solid #dedfe0;border-radius:14px;height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:19px;font-weight:700;text-align:center;line-height:1.05;padding:4px;color:#12332b}
+.sc canvas{width:96px;height:70px}
+.sc.sel{border-color:#006751;background:#eef3e0;box-shadow:0 0 0 4px #dbe68d}
+.sc.done{visibility:hidden}
+.sc.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+.bin{border:4px dashed #006751;border-radius:18px;height:262px;background:#fff;padding:12px;display:flex;flex-direction:column;cursor:pointer}
+.bin.no{border-color:#b3261e}
+.bin h3{font-size:24px;text-align:center;margin-bottom:4px}
+.bin.no h3{color:#b3261e}.bin.yes h3{color:#006751}
+.bin .in{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;justify-content:center}
+.chip{background:#eef3e0;border:3px solid transparent;border-radius:10px;padding:3px 6px;display:flex;flex-direction:column;align-items:center;font-size:13px;font-weight:700;width:92px;cursor:pointer;font-family:inherit;color:#12332b;text-align:center;line-height:1.05}
+.bin.no .chip{background:#fdecea}
+.chip canvas{width:60px;height:42px}
+.chip.on{border-color:#006751;box-shadow:0 0 0 3px #dbe68d}
+.hint{font-size:21px;margin-bottom:8px;color:#3d5a52}
+.right{display:flex;flex-direction:column;gap:12px}
+#demo{width:622px;height:420px;border-radius:14px;background:#fff;display:block}
+.cnt{font-size:24px;font-weight:700}
+</style>
+<main>
+  <div>
+    <div class="hint" id="hint">1. Pieskaries figūrai. 2. Pieskaries laukam, kurā tā iederas. Pieskaries jau ieliktai figūrai – labajā pusē atkal redzēsi tās rakstu.</div>
+    <div class="tray" id="tray"></div>
+    <div class="bins">
+      <div class="bin yes" id="binY"><h3>Aizpilda plakni bez spraugām</h3><div class="in"></div></div>
+      <div class="bin no" id="binN"><h3>Paliek spraugas</h3><div class="in"></div></div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="card" style="padding:10px"><canvas id="demo" width="622" height="420"></canvas></div>
+    <div class="fb" id="fb">Šeit redzēsi, kā izvēlētā figūra klājas plaknē. Sarkanā krāsa parāda spraugas.</div>
+    <div class="cnt"><span id="cnt"></span> · <span id="err">Kļūdas: 0</span></div>
+  </div>
+</main>
+<footer class="bot">
+  <div class="info">Figūras, kas aizpilda plakni bez spraugām un pārklāšanās, veido plaknes pārklājumu.</div>
+  <button class="btn sec" id="again">Sākt no jauna</button>
+  <button class="btn fs" id="fsbtn"></button>
+</footer>
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  function fit(){var s=Math.min(window.innerWidth/1600,window.innerHeight/900);stage.style.transform='scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  var fsb=document.getElementById('fsbtn');
+  function isFs(){return document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement;}
+  function upd(){if(fsb)fsb.textContent=isFs()?'⛶ Aizvērt pilnekrāna režīmu':'⛶ Atvērt pilnekrāna režīmu';fit();}
+  if(fsb)fsb.addEventListener('click',function(){
+    var d=document.documentElement;
+    if(!isFs()){var f=d.requestFullscreen||d.webkitRequestFullscreen||d.msRequestFullscreen;if(f){try{var p=f.call(d);if(p&&p.catch)p.catch(function(){});}catch(e){}}}
+    else{var x=document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen;if(x)x.call(document);}
+  });
+  ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(function(e){document.addEventListener(e,upd);});
+  upd();
+  window.U={
+    shuffle:function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;},
+    el:function(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==='class')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else if(k==='text')e.textContent=attrs[k];else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k]);}
+      (kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==='string'?document.createTextNode(c):c);});return e;},
+    $:function(s){return document.querySelector(s);},
+    scale:function(){return Math.min(window.innerWidth/1600,window.innerHeight/900);},
+    /* Taimeris: mount(el,{min:5}) -> pogas Sākt / Apturēt, laiku iestata skolotājs */
+    timer:function(host,opt){
+      opt=opt||{};var total=(opt.min||5)*60,left=total,run=false,iv=null;
+      var disp=U.el('div',{class:'tm-disp'});var minus=U.el('button',{class:'btn sec tm-s',text:'−'});var plus=U.el('button',{class:'btn sec tm-s',text:'+'});
+      var start=U.el('button',{class:'btn',text:'Sākt'});var stop=U.el('button',{class:'btn sec',text:'Apturēt'});var reset=U.el('button',{class:'btn sec',text:'No sākuma'});
+      var inp=U.el('input',{type:'number',min:'1',max:'90',value:String(opt.min||5),class:'tm-in','aria-label':'Laiks minūtēs'});
+      var lab=U.el('div',{class:'tm-lab'},['Laiks minūtēs: ',inp]);
+      function fromInp(){if(run)return;var v=parseInt(inp.value,10);if(isNaN(v))return;v=Math.max(1,Math.min(90,v));total=v*60;left=total;draw();}
+      inp.addEventListener('input',fromInp);inp.addEventListener('change',function(){fromInp();inp.value=Math.round(total/60);});
+      function fmt(s){var m=Math.floor(s/60),x=s%60;return m+':'+(x<10?'0':'')+x;}
+      function draw(){disp.textContent=fmt(left);disp.classList.toggle('tm-end',left===0);start.disabled=run||left===0;stop.disabled=!run;minus.disabled=run;plus.disabled=run;inp.disabled=run;}
+      function halt(){run=false;if(iv){clearInterval(iv);iv=null;}draw();}
+      minus.onclick=function(){if(run)return;total=Math.max(60,total-60);left=total;inp.value=Math.round(total/60);draw();};
+      plus.onclick=function(){if(run)return;total=Math.min(90*60,total+60);left=total;inp.value=Math.round(total/60);draw();};
+      start.onclick=function(){if(run||left===0)return;run=true;iv=setInterval(function(){left--;if(left<=0){left=0;halt();if(opt.onEnd)opt.onEnd();}draw();},1000);draw();};
+      stop.onclick=halt;reset.onclick=function(){halt();left=total;draw();};
+      host.appendChild(U.el('div',{class:'tm'},[lab,U.el('div',{class:'tm-row'},[minus,disp,plus]),U.el('div',{class:'tm-row'},[start,stop,reset])]));
+      draw();return {reset:function(){halt();left=total;draw();}};
+    }
+  };
+})();
+
+(function(){
+var COL=['#006751','#dbe68d','#8fbfae','#f4f6ea','#4f9b86'],GAP='#e2574c',INK='#12332b';
+function reg(n,r,rot){var p=[];for(var i=0;i<n;i++){var a=rot+i*2*Math.PI/n;p.push([r*Math.cos(a),r*Math.sin(a)]);}return p;}
+function star(R,r){var p=[];for(var i=0;i<10;i++){var a=-Math.PI/2+i*Math.PI/5,q=i%2?r:R;p.push([q*Math.cos(a),q*Math.sin(a)]);}return p;}
+function moon(R){var r=R*0.86,cx=R*0.5,p=[],a;for(a=0;a<360;a+=6){var x=R*Math.cos(a*Math.PI/180),y=R*Math.sin(a*Math.PI/180);if(Math.hypot(x-cx,y)>r)p.push([x,y]);}
+  var q=[];for(a=0;a<360;a+=6){var x2=cx+r*Math.cos(a*Math.PI/180),y2=r*Math.sin(a*Math.PI/180);if(Math.hypot(x2,y2)<R)q.push([x2,y2,a]);}
+  q.sort(function(m,n){return n[2]-m[2]});return p.concat(q.map(function(z){return [z[0],z[1]]}));}
+var s=64,h=s*Math.sqrt(3)/2;
+var qA=[0,0],qB=[92,12],qC=[70,78],qD=[-18,52];
+function refl(p){return [qB[0]+qC[0]-p[0],qB[1]+qC[1]-p[1]];}
+var qA2=refl(qA),qD2=refl(qD);
+var u=27;
+var eT=[[0,0],[.14,-.2],[.34,-.24],[.5,-.06],[.62,.14],[.8,.16],[1,0]],eL=[[0,0],[-.2,.16],[-.22,.36],[-.04,.5],[.14,.62],[.14,.82],[0,1]];
+function escher(S){var p=[];eT.forEach(function(q){p.push([q[0]*S,q[1]*S]);});
+  eL.slice(1).forEach(function(q){p.push([S+q[0]*S,q[1]*S]);});
+  eT.slice(0,-1).reverse().forEach(function(q){p.push([q[0]*S,S+q[1]*S]);});
+  eL.slice(1,-1).reverse().forEach(function(q){p.push([q[0]*S,q[1]*S]);});return p;}
+var octA=30,octW=octA*(1+Math.SQRT2),octR=octA/(2*Math.sin(Math.PI/8));
+var SH=[
+ {id:'tri',n:'Vienādmalu trijstūris',ok:1,t1:[s,0],t2:[s/2,h],polys:[{p:[[0,0],[s,0],[s/2,h]],c:function(){return 0}},{p:[[s,0],[s/2,h],[1.5*s,h]],c:function(){return 1}}],icon:[[0,h],[s,h],[s/2,0]],
+  e:'Seši vienādmalu trijstūri satiekas vienā punktā: 6 × 60° = 360°. Spraugu nav.'},
+ {id:'sq',n:'Kvadrāts',ok:1,t1:[s,0],t2:[0,s],polys:[{p:[[0,0],[s,0],[s,s],[0,s]],c:function(i,j){return ((i+j)%2+2)%2}}],
+  e:'Četri kvadrāti satiekas vienā punktā: 4 × 90° = 360°. Spraugu nav.'},
+ {id:'hex',n:'Regulārs sešstūris',ok:1,t1:[1.5*40,h*40/s],t2:[0,2*h*40/s],polys:[{p:reg(6,40,0),c:function(i,j){return ((i-j)%3+3)%3}}],
+  e:'Trīs sešstūri satiekas vienā punktā: 3 × 120° = 360°. Tā bites būvē šūnas.'},
+ {id:'rect',n:'Taisnstūris',ok:1,t1:[96,0],t2:[48,44],polys:[{p:[[0,0],[96,0],[96,44],[0,44]],c:function(i,j){return ((i+2*j)%3+3)%3}}],
+  e:'Taisnstūri klājas kā ķieģeļi mūrī. Rindas var arī nobīdīt – spraugu nav.'},
+ {id:'rh',n:'Rombs',ok:1,t1:[s,0],t2:[s/2,h],polys:[{p:[[0,0],[s,0],[1.5*s,h],[s/2,h]],c:function(i,j){return ((i+j)%2+2)%2}}],
+  e:'Romba pretējās malas ir paralēlas un vienādas, tāpēc rombi saguļ cits pie cita bez spraugām.'},
+ {id:'quad',n:'Neregulārs četrstūris',ok:1,t1:[qD2[0]-qA[0],qD2[1]-qA[1]],t2:[qA2[0]-qB[0],qA2[1]-qB[1]],polys:[{p:[qA,qB,qC,qD],c:function(){return 0}},{p:[qA2,qC,qB,qD2],c:function(){return 1}}],icon:[qA,qB,qC,qD],
+  e:'Pārsteigums: plakni aizpilda jebkurš četrstūris. Katru otro figūru pagriež par 180°, un četri dažādie stūri kopā veido 360°.'},
+ {id:'cross',n:'Krusts no 5 kvadrātiem',ok:1,t1:[2*u,u],t2:[-u,2*u],polys:[{p:[[1,0],[2,0],[2,1],[3,1],[3,2],[2,2],[2,3],[1,3],[1,2],[0,2],[0,1],[1,1]].map(function(q){return [q[0]*u,q[1]*u]}),c:function(i,j){return ((i+2*j)%5+5)%5}}],
+  e:'Krusta izvirzījums ieguļ blakus krusta iedobē – kā puzles gabals. Spraugu nav.'},
+ {id:'esch',n:'Ešera figūra',ok:1,t1:[80,0],t2:[0,80],polys:[{p:escher(80),c:function(i,j){return ((i+j)%2+2)%2}}],
+  e:'Tā strādāja Ešers: kvadrāta vienā malā izgriezto daļu pieliek pretējā malā. Laukums nemainās, tāpēc figūra joprojām aizpilda plakni.'},
+ {id:'pent',n:'Regulārs piecstūris',ok:0,custom:'pent',icon:reg(5,40,-Math.PI/2),
+  e:'Regulāra piecstūra leņķis ir 108°. Trīs kopā dod 324°, četri – 432°. Tieši 360° nesanāk, tāpēc paliek spraugas.'},
+ {id:'circ',n:'Aplis',ok:0,custom:'circ',
+  e:'Apļi saskaras tikai vienā punktā. Starp tiem vienmēr paliek spraugas.'},
+ {id:'oct',n:'Regulārs astoņstūris',ok:0,custom:'oct',icon:reg(8,40,Math.PI/8),
+  e:'Regulāra astoņstūra leņķis ir 135°. Divi kopā dod 270°, pāri paliek 90° – kvadrāta sprauga. Kopā ar kvadrātiem astoņstūri aizpilda plakni.'},
+ {id:'hept',n:'Regulārs septiņstūris',ok:0,custom:'hept',icon:reg(7,40,-Math.PI/2),
+  e:'Regulāra septiņstūra leņķis ir aptuveni 128,6°. Divi kopā dod aptuveni 257°, trīs – aptuveni 386°. Tieši 360° nesanāk, tāpēc paliek spraugas.'},
+ {id:'ell',n:'Ovāls',ok:0,custom:'ell',
+  e:'Ovāla mala visur ir izliekta uz āru, tāpat kā aplim. Blakus ovāli saskaras tikai vienā punktā, un starp tiem paliek spraugas.'},
+ {id:'moon',n:'Mēness sirpis',ok:0,custom:'moon',icon:moon(42),
+  e:'Sirpja ārējā mala ir izliekta, bet iekšējā mala ir cita apļa loks. Tās nesakrīt, tāpēc sirpji neiegulst cits citā bez spraugām.'},
+ {id:'star',n:'Piecstaru zvaigzne',ok:0,custom:'star',icon:star(42,17),
+  e:'Zvaigznes stari neiegulst cits citā tā, lai nosegtu visu plakni. Starp zvaigznēm paliek spraugas.'}
+];
+function path(ctx,p,ox,oy,k){ctx.beginPath();p.forEach(function(q,i){var x=ox+q[0]*(k||1),y=oy+q[1]*(k||1);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();}
+function icon(cv,sh){var c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);c.fillStyle='#006751';c.strokeStyle=INK;c.lineWidth=3;c.lineJoin='round';
+  if(sh.id==='circ'){c.beginPath();c.arc(cv.width/2,cv.height/2,cv.height*0.42,0,7);c.fill();c.stroke();return;}
+  if(sh.id==='ell'){c.beginPath();c.ellipse(cv.width/2,cv.height/2,cv.width*0.44,cv.height*0.3,0,0,7);c.fill();c.stroke();return;}
+  var p=sh.icon||sh.polys[0].p,minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;p.forEach(function(q){minx=Math.min(minx,q[0]);maxx=Math.max(maxx,q[0]);miny=Math.min(miny,q[1]);maxy=Math.max(maxy,q[1]);});
+  var k=Math.min((cv.width-14)/(maxx-minx),(cv.height-14)/(maxy-miny));
+  path(c,p,cv.width/2-(minx+maxx)/2*k,cv.height/2-(miny+maxy)/2*k,k);c.fill();c.stroke();}
+var demo=document.getElementById('demo'),dc=demo.getContext('2d'),anim=null;
+function tiles(sh){var W=demo.width,H=demo.height,out=[];
+  if(sh.custom==='circ'){var r=34;for(var j=-1;j<9;j++)for(var i=-1;i<12;i++)out.push({circ:[i*2*r+(j%2?r:0)+10,j*r*Math.sqrt(3)+14,r],c:(i+j)%2?1:0});return out;}
+  if(sh.custom==='oct'){for(var j=-1;j<8;j++)for(var i=-1;i<10;i++)out.push({p:reg(8,octR,Math.PI/8),o:[i*octW+20,j*octW+24],c:((i+j)%2+2)%2});return out;}
+  if(sh.custom==='pent'){var R=44,pw=2*R*Math.sin(2*Math.PI/5),ph=R*(1+Math.cos(Math.PI/5));for(var j=-1;j<7;j++)for(var i=-1;i<10;i++){var up=((i+j)%2+2)%2;out.push({p:reg(5,R,up?Math.PI/2:-Math.PI/2),o:[i*pw*0.81+30,j*(ph+2)+50+(up?-R*0.19:0)],c:up});}return out;}
+  if(sh.custom==='hept'){for(var j=-1;j<7;j++)for(var i=-1;i<10;i++)out.push({p:reg(7,42,-Math.PI/2+((i+j)%2?Math.PI/7:0)),o:[i*90+(j%2?45:0)+24,j*82+40],c:((i+j)%2+2)%2});return out;}
+  if(sh.custom==='ell'){for(var j=-1;j<9;j++)for(var i=-1;i<9;i++)out.push({ell:[i*104+(j%2?52:0)+20,j*54+20,52,31],c:((i+j)%2+2)%2});return out;}
+  if(sh.custom==='moon'){for(var j=-1;j<7;j++)for(var i=-1;i<12;i++)out.push({p:moon(44),o:[i*74+(j%2?37:0)+30,j*92+46],c:((i+j)%2+2)%2});return out;}
+  if(sh.custom==='star'){for(var j=-1;j<7;j++)for(var i=-1;i<10;i++)out.push({p:star(46,18),o:[i*88+(j%2?44:0)+20,j*70+40],c:((i+j)%2+2)%2});return out;}
+  for(var j=-14;j<16;j++)for(var i=-14;i<18;i++){var ox=i*sh.t1[0]+j*sh.t2[0]+40,oy=i*sh.t1[1]+j*sh.t2[1]+30;
+    if(ox<-180||ox>W+120||oy<-180||oy>H+120)continue;sh.polys.forEach(function(pl){out.push({p:pl.p,o:[ox,oy],c:pl.c(i,j)});});}
+  out.sort(function(a,b){return (a.o[1]+a.o[0]*0.35)-(b.o[1]+b.o[0]*0.35)});return out;}
+function showDemo(sh){if(anim)clearInterval(anim);var W=demo.width,H=demo.height,T=tiles(sh),n=0;
+  dc.fillStyle=GAP;dc.fillRect(0,0,W,H);dc.lineJoin='round';dc.lineWidth=2;dc.strokeStyle=INK;
+  var step=Math.max(1,Math.round(T.length/70));
+  anim=setInterval(function(){for(var k=0;k<step&&n<T.length;k++,n++){var t=T[n];dc.fillStyle=COL[t.c];
+      if(t.circ){dc.beginPath();dc.arc(t.circ[0],t.circ[1],t.circ[2],0,7);}else if(t.ell){dc.beginPath();dc.ellipse(t.ell[0],t.ell[1],t.ell[2],t.ell[3],0,0,7);}else path(dc,t.p,t.o[0],t.o[1]);dc.fill();dc.stroke();}
+    if(n>=T.length){clearInterval(anim);anim=null;}},22);}
+var tray=document.getElementById('tray'),fb=document.getElementById('fb'),sel=null,right=0,errs=0,order;
+function setFb(cls,html){fb.className='fb '+cls;fb.innerHTML=html;}
+function start(){tray.innerHTML='';document.querySelectorAll('.bin .in').forEach(function(e){e.innerHTML='';});sel=null;right=0;errs=0;upd();
+  if(anim)clearInterval(anim);dc.fillStyle='#fff';dc.fillRect(0,0,demo.width,demo.height);
+  setFb('','Šeit redzēsi, kā izvēlētā figūra klājas plaknē. Sarkanā krāsa parāda spraugas.');
+  U.shuffle(SH).forEach(function(sh){var cv=U.el('canvas',{width:'240',height:'184'});var b=U.el('button',{class:'sc'},[cv,U.el('span',{text:sh.n})]);icon(cv,sh);
+    b.onclick=function(){if(b.classList.contains('done'))return;document.querySelectorAll('.sc').forEach(function(x){x.classList.remove('sel')});b.classList.add('sel');sel={sh:sh,b:b};
+      setFb('','Izvēlēta figūra: <b>'+sh.n+'</b>. Tagad pieskaries laukam, kurā tā iederas.');};
+    tray.appendChild(b);});}
+function upd(){document.getElementById('cnt').textContent='Pareizi: '+right+' no '+SH.length;document.getElementById('err').textContent='Kļūdas: '+errs;}
+function drop(isYes,bin){if(!sel){setFb('bad','Vispirms pieskaries kādai figūrai augšā.');return;}
+  var sh=sel.sh,b=sel.b;showDemo(sh);
+  if(!!sh.ok===isYes){right++;b.classList.add('done');b.classList.remove('sel');
+    var cv=U.el('canvas',{width:'144',height:'110'});var chip=U.el('button',{class:'chip',title:'Parādīt rakstu'},[cv,U.el('span',{text:sh.n})]);chip.onclick=function(ev){ev.stopPropagation();document.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on')});chip.classList.add('on');showDemo(sh);setFb(sh.ok?'okb':'','<b>'+sh.n+(sh.ok?' – aizpilda plakni.':' – paliek spraugas.')+'</b> '+sh.e+' <i>Pārrunājiet: kāpēc tā?</i>');};bin.querySelector('.in').appendChild(chip);icon(cv,sh);
+    setFb('okb','<b>Pareizi – '+(sh.ok?'šī figūra aizpilda plakni.':'šī figūra plakni neaizpilda.')+'</b> '+sh.e+(right===SH.length?'<br><b>Visas figūras sašķirotas!</b>':''));sel=null;}
+  else{errs++;b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
+    setFb('bad','<b>Nē. Paskaties labajā pusē, kā šī figūra klājas.</b> '+sh.e+' Ieliec figūru otrā laukā.');}
+  upd();}
+document.getElementById('binY').onclick=function(){drop(true,this)};
+document.getElementById('binN').onclick=function(){drop(false,this)};
+document.getElementById('again').onclick=start;
+start();
+})();
+</script>
+
+</div></div></body></html>

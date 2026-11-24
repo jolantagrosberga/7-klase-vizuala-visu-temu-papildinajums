@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="lv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7.4 Mīmikas konstruktors – interaktīvs rīks</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0b2a23;font-family:Candara,"Segoe UI","Trebuchet MS",Verdana,sans-serif;color:#12332b}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1600px;height:900px;flex:none;transform-origin:center center;background:#f6f7f4;position:relative;overflow:hidden;display:flex;flex-direction:column}
+header.top{height:74px;flex:none;background:#006751;color:#fff;display:flex;align-items:center;padding:0 28px;gap:20px}
+header.top .tema{background:#dbe68d;color:#12332b;font-weight:700;border-radius:8px;padding:6px 14px;font-size:22px;white-space:nowrap}
+header.top h1{font-size:34px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+header.top .sub{font-size:21px;opacity:.92;margin-left:auto;text-align:right;line-height:1.15;max-width:760px}
+main{flex:1;min-height:0;position:relative;padding:18px 28px 10px}
+footer.bot{height:62px;flex:none;display:flex;align-items:center;gap:14px;padding:0 28px 8px;}
+footer.bot .info{font-size:20px;color:#3d5a52;flex:1;min-width:0}
+button{font-family:inherit;cursor:pointer}
+.btn{border:0;border-radius:12px;background:#006751;color:#fff;font-size:24px;font-weight:700;padding:11px 22px;min-height:50px;box-shadow:0 2px 0 #00483a;transition:transform .06s,background .15s}
+.btn:hover{background:#00795f}.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.sec{background:#dedfe0;color:#12332b;box-shadow:0 2px 0 #b9bbbd}.btn.sec:hover{background:#d0d2d4}
+.btn.lime{background:#dbe68d;color:#12332b;box-shadow:0 2px 0 #b4c05e}.btn.lime:hover{background:#d2e070}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.fs{background:#fff;color:#006751;border:2px solid #006751;box-shadow:none;font-size:20px;padding:8px 16px;min-height:44px;margin-left:auto;white-space:nowrap}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,60,45,.13)}
+.pill{display:inline-block;background:#dbe68d;border-radius:999px;padding:4px 16px;font-size:21px;font-weight:700}
+.ok{color:#11703f}.bad{color:#b3261e}
+.fb{font-size:23px;line-height:1.3;border-radius:14px;padding:14px 18px;background:#eef3e0;border-left:8px solid #006751}
+.fb.bad{background:#fdecea;border-left-color:#b3261e;color:#5f1611}
+.fb.okb{background:#e3f4e8;border-left-color:#11703f;color:#0d4a2b}
+.src{font-size:15px;color:#6a7f78}
+.hidden{display:none!important}
+
+.tm{display:flex;flex-direction:column;gap:10px;align-items:center}
+.tm-lab{font-size:21px;color:#3d5a52;display:flex;align-items:center;gap:8px}
+.tm-in{font:inherit;font-size:26px;font-weight:700;width:92px;height:46px;text-align:center;border:3px solid #006751;border-radius:10px;color:#12332b;background:#fff}
+.tm-row{display:flex;gap:10px;align-items:center;justify-content:center}
+.tm-disp{font-size:74px;font-weight:700;color:#006751;min-width:210px;text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.tm-disp.tm-end{color:#b3261e}
+
+.tm-row .btn{font-size:21px;padding:9px 14px;white-space:nowrap}
+.tm-s{font-size:34px;width:58px;padding:0;min-height:58px}
+</style></head>
+<body><div id="wrap"><div id="stage">
+<header class="top"><span class="tema">7.4</span><h1>Mīmikas konstruktors</h1><div class="sub">Ar slīdņiem izveido emociju. Tad to pārspīlē – tā rodas deformācija.</div></header>
+
+<style>
+main{display:grid;grid-template-columns:640px 1fr;gap:26px}
+.pic{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,60,45,.13);padding:10px;display:flex;align-items:center;justify-content:center}
+#cv{width:620px;height:700px;display:block}
+.side{display:flex;flex-direction:column;gap:9px}
+.task{background:#eef3e0;border-radius:14px;padding:12px 18px;font-size:25px;line-height:1.25}
+.task b{color:#006751;font-size:32px}
+.sl{display:grid;grid-template-columns:230px 1fr 150px;align-items:center;gap:10px;font-size:22px;font-weight:700}
+.sl span{font-weight:400;font-size:18px;color:#3d5a52}
+.sl.ex{background:#dbe68d;border-radius:12px;padding:6px 10px}
+input[type=range]{width:100%;height:38px;accent-color:#006751}
+.emo{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.emo .btn{font-size:20px;padding:8px 6px}
+.emo .btn.on{background:#006751;color:#fff}
+.fb{font-size:21px}
+</style>
+<main>
+  <div class="pic"><canvas id="cv" width="620" height="700"></canvas></div>
+  <div class="side">
+    <div class="emo" id="emo"></div>
+    <div class="task" id="task"></div>
+    <div id="sls"></div>
+    <div class="fb" id="fb">Kad seja gatava, nospied „Pārbaudīt”.</div>
+    <div style="display:flex;gap:12px;margin-top:auto">
+      <button class="btn" id="check">Pārbaudīt</button>
+      <button class="btn sec" id="neutral">Mierīga seja</button>
+    </div>
+  </div>
+</main>
+<footer class="bot">
+  <div class="info">Mīmika ir tas, ko seja dara pati. Deformācija ir tas, ko formai apzināti nodara mākslinieks.</div>
+  <button class="btn fs" id="fsbtn"></button>
+</footer>
+<script>
+(function(){
+  var stage=document.getElementById('stage');
+  function fit(){var s=Math.min(window.innerWidth/1600,window.innerHeight/900);stage.style.transform='scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  var fsb=document.getElementById('fsbtn');
+  function isFs(){return document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement;}
+  function upd(){if(fsb)fsb.textContent=isFs()?'⛶ Aizvērt pilnekrāna režīmu':'⛶ Atvērt pilnekrāna režīmu';fit();}
+  if(fsb)fsb.addEventListener('click',function(){
+    var d=document.documentElement;
+    if(!isFs()){var f=d.requestFullscreen||d.webkitRequestFullscreen||d.msRequestFullscreen;if(f){try{var p=f.call(d);if(p&&p.catch)p.catch(function(){});}catch(e){}}}
+    else{var x=document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen;if(x)x.call(document);}
+  });
+  ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(function(e){document.addEventListener(e,upd);});
+  upd();
+  window.U={
+    shuffle:function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;},
+    el:function(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==='class')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else if(k==='text')e.textContent=attrs[k];else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k]);}
+      (kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==='string'?document.createTextNode(c):c);});return e;},
+    $:function(s){return document.querySelector(s);},
+    scale:function(){return Math.min(window.innerWidth/1600,window.innerHeight/900);},
+    /* Taimeris: mount(el,{min:5}) -> pogas Sākt / Apturēt, laiku iestata skolotājs */
+    timer:function(host,opt){
+      opt=opt||{};var total=(opt.min||5)*60,left=total,run=false,iv=null;
+      var disp=U.el('div',{class:'tm-disp'});var minus=U.el('button',{class:'btn sec tm-s',text:'−'});var plus=U.el('button',{class:'btn sec tm-s',text:'+'});
+      var start=U.el('button',{class:'btn',text:'Sākt'});var stop=U.el('button',{class:'btn sec',text:'Apturēt'});var reset=U.el('button',{class:'btn sec',text:'No sākuma'});
+      var inp=U.el('input',{type:'number',min:'1',max:'90',value:String(opt.min||5),class:'tm-in','aria-label':'Laiks minūtēs'});
+      var lab=U.el('div',{class:'tm-lab'},['Laiks minūtēs: ',inp]);
+      function fromInp(){if(run)return;var v=parseInt(inp.value,10);if(isNaN(v))return;v=Math.max(1,Math.min(90,v));total=v*60;left=total;draw();}
+      inp.addEventListener('input',fromInp);inp.addEventListener('change',function(){fromInp();inp.value=Math.round(total/60);});
+      function fmt(s){var m=Math.floor(s/60),x=s%60;return m+':'+(x<10?'0':'')+x;}
+      function draw(){disp.textContent=fmt(left);disp.classList.toggle('tm-end',left===0);start.disabled=run||left===0;stop.disabled=!run;minus.disabled=run;plus.disabled=run;inp.disabled=run;}
+      function halt(){run=false;if(iv){clearInterval(iv);iv=null;}draw();}
+      minus.onclick=function(){if(run)return;total=Math.max(60,total-60);left=total;inp.value=Math.round(total/60);draw();};
+      plus.onclick=function(){if(run)return;total=Math.min(90*60,total+60);left=total;inp.value=Math.round(total/60);draw();};
+      start.onclick=function(){if(run||left===0)return;run=true;iv=setInterval(function(){left--;if(left<=0){left=0;halt();if(opt.onEnd)opt.onEnd();}draw();},1000);draw();};
+      stop.onclick=halt;reset.onclick=function(){halt();left=total;draw();};
+      host.appendChild(U.el('div',{class:'tm'},[lab,U.el('div',{class:'tm-row'},[minus,disp,plus]),U.el('div',{class:'tm-row'},[start,stop,reset])]));
+      draw();return {reset:function(){halt();left=total;draw();}};
+    }
+  };
+})();
+
+(function(){
+var P={tilt:0,bh:0,eye:0,curve:0,open:0,ex:0};
+var SL=[['tilt','Uzacu slīpums','uz leju pie deguna','uz augšu pie deguna'],['bh','Uzacu augstums','zemu','augstu'],['eye','Acu atvērums','samiegtas','ieplestas'],['curve','Mutes kaktiņi','uz leju','uz augšu'],['open','Mutes atvērums','aizvērta','atvērta']];
+var EM=[
+ {n:'Prieks',c:[['curve',0.35,1,'Pacel mutes kaktiņus.'],['tilt',-0.5,0.5,'Uzacis prieka sejā ir mierīgas.']]},
+ {n:'Skumjas',c:[['curve',-1,-0.3,'Novelc mutes kaktiņus uz leju.'],['tilt',0.3,1,'Pacel uzacu iekšējos galus.'],['eye',-1,0.2,'Skumjā sejā acis nav ieplestas.']]},
+ {n:'Dusmas',c:[['tilt',-1,-0.4,'Novelc uzacis uz leju pie deguna.'],['bh',-1,0,'Nolaid uzacis zemāk.'],['curve',-1,0.1,'Dusmās mutes kaktiņi nav pacelti.']]},
+ {n:'Pārsteigums',c:[['bh',0.45,1,'Pacel uzacis augstu.'],['eye',0.4,1,'Ieplet acis.'],['open',0.35,1,'Atver muti.']]},
+ {n:'Bailes',c:[['bh',0.25,1,'Pacel uzacis.'],['tilt',0.2,1,'Pacel uzacu iekšējos galus.'],['eye',0.4,1,'Ieplet acis.'],['open',0.15,1,'Nedaudz atver muti.']]}];
+var GEN={'Prieks':'prieka','Skumjas':'skumju','Dusmas':'dusmu','Pārsteigums':'pārsteiguma','Bailes':'baiļu'};var cur=EM[0],inp={};
+var cv=U.$('#cv'),c=cv.getContext('2d');
+function draw(){var W=620,H=700,k=1+P.ex*1.4;var t=P.tilt*k,bh=P.bh*k,ey=P.eye*k,cu=P.curve*k,op=Math.max(0,P.open)*k;
+  var clamp=function(v,a,b){return v<a?a:v>b?b:v};t=clamp(t,-2.2,2.2);bh=clamp(bh,-2,2.2);ey=clamp(ey,-1.2,2.2);cu=clamp(cu,-2.2,2.2);op=clamp(op,0,2.2);
+  var hs=1+P.ex*0.16*(op+Math.max(0,bh)*0.6)-P.ex*0.07*Math.max(0,cu),ws=1+P.ex*0.13*Math.max(0,cu)-P.ex*0.07*op;
+  c.clearRect(0,0,W,H);c.lineCap='round';c.lineJoin='round';
+  var cx=310,cy=330,rw=170*ws,rh=215*hs;
+  c.fillStyle='#e9b98f';c.fillRect(cx-58,cy+rh-40,116,150);c.fillStyle='#006751';c.beginPath();c.moveTo(cx-250,H);c.quadraticCurveTo(cx-230,cy+rh+60,cx-58,cy+rh+50);c.lineTo(cx+58,cy+rh+50);c.quadraticCurveTo(cx+230,cy+rh+60,cx+250,H);c.closePath();c.fill();
+  c.fillStyle='#e2ae82';c.beginPath();c.ellipse(cx-rw,cy+5,24,42,0,0,7);c.ellipse(cx+rw,cy+5,24,42,0,0,7);c.fill();
+  c.fillStyle='#f2c79f';c.beginPath();c.ellipse(cx,cy,rw,rh,0,0,7);c.fill();
+  c.fillStyle='#4a3020';c.beginPath();c.moveTo(cx-rw-6,cy-20);c.bezierCurveTo(cx-rw-20,cy-rh-70,cx+rw+20,cy-rh-70,cx+rw+6,cy-20);c.bezierCurveTo(cx+rw-10,cy-rh*0.62,cx+40,cy-rh*0.74,cx-20,cy-rh*0.7);c.bezierCurveTo(cx-90,cy-rh*0.66,cx-rw+14,cy-rh*0.5,cx-rw-6,cy-20);c.fill();
+  var ey0=cy-28*hs,ex0=72*ws,eh=22+ey*13;eh=Math.max(4,eh);
+  [-1,1].forEach(function(s){var x=cx+s*ex0;c.save();c.beginPath();c.ellipse(x,ey0,38,eh,0,0,7);c.fillStyle='#fff';c.fill();c.clip();c.fillStyle='#3c6e8f';c.beginPath();c.arc(x,ey0,17,0,7);c.fill();c.fillStyle='#111';c.beginPath();c.arc(x,ey0,8,0,7);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(x+5,ey0-5,3.5,0,7);c.fill();c.restore();
+    c.strokeStyle='#4a3020';c.lineWidth=4;c.beginPath();c.ellipse(x,ey0,38,eh,0,0,7);c.stroke();
+    var by=ey0-eh-22-bh*22,dy=t*20;c.strokeStyle='#3a2416';c.lineWidth=13;c.beginPath();c.moveTo(x-s*44,by-dy*0.6);c.quadraticCurveTo(x,by-8,x+s*46,by+dy*0.6);c.stroke();});
+  c.strokeStyle='#c98f66';c.lineWidth=6;c.beginPath();c.moveTo(cx-6,ey0+26);c.quadraticCurveTo(cx-24,cy+56*hs,cx-16,cy+66*hs);c.quadraticCurveTo(cx,cy+76*hs,cx+18,cy+66*hs);c.stroke();
+  var my=cy+128*hs,mw=74*ws+Math.abs(cu)*10,dyc=-cu*24,oh=op*34;
+  c.beginPath();c.moveTo(cx-mw,my+dyc);c.quadraticCurveTo(cx,my-dyc*0.9-oh*0.35,cx+mw,my+dyc);c.quadraticCurveTo(cx,my-dyc*0.9+oh*1.5+6,cx-mw,my+dyc);c.closePath();
+  if(oh>4){c.fillStyle='#5a1a1a';c.fill();c.save();c.clip();c.fillStyle='#fff';c.fillRect(cx-mw,my-dyc*0.9-oh*0.35-4,mw*2,Math.min(16,oh*0.5)+6);c.restore();}
+  c.strokeStyle='#a5483f';c.lineWidth=oh>4?9:11;c.stroke();}
+function mkSl(){var host=U.$('#sls');host.innerHTML='';SL.forEach(function(s){var i=U.el('input',{type:'range',min:'-100',max:'100',value:'0'});if(s[0]==='open'){i.min='0';}
+    i.oninput=function(){P[s[0]]=i.value/100;draw();};inp[s[0]]=i;host.appendChild(U.el('div',{class:'sl'},[U.el('div',{html:s[1]+'<br><span>'+s[2]+'</span>'}),i,U.el('span',{text:s[3]})]));});
+  var e=U.el('input',{type:'range',min:'0',max:'100',value:'0'});e.oninput=function(){P.ex=e.value/100;draw();};inp.ex=e;host.appendChild(U.el('div',{class:'sl ex',style:'margin-top:6px'},[U.el('div',{html:'Pārspīlējums<br><span>kā dabā</span>'}),e,U.el('span',{text:'deformācija'})]));}
+function neutral(){for(var k in inp){inp[k].value=0;P[k]=0;}draw();}
+function setEm(e,b){cur=e;[].forEach.call(U.$('#emo').children,function(x){x.classList.remove('on')});b.classList.add('on');U.$('#task').innerHTML='Uzdevums: izveido emociju <b>„'+e.n.toLowerCase()+'”</b>.';U.$('#fb').className='fb';U.$('#fb').textContent='Kad seja gatava, nospied „Pārbaudīt”.';}
+EM.forEach(function(e,i){var b=U.el('button',{class:'btn sec',text:e.n});b.onclick=function(){setEm(e,b)};U.$('#emo').appendChild(b);if(i===0)setEm(e,b);});
+U.$('#check').onclick=function(){var miss=[];cur.c.forEach(function(q){var v=P[q[0]];if(v<q[1]||v>q[2])miss.push(q[3]);});var fb=U.$('#fb');
+  if(miss.length){fb.className='fb bad';fb.innerHTML='<b>Vēl nav '+GEN[cur.n]+'.</b> '+miss.join(' ');}
+  else if(P.ex<0.35){fb.className='fb okb';fb.innerHTML='<b>Jā, tā izskatās '+cur.n.toLowerCase()+'.</b> Tagad pavelc slīdni „Pārspīlējums” un vēro, kas notiek ar sejas formu.';}
+  else{fb.className='fb okb';fb.innerHTML='<b>Tas ir ekspresīvs portrets.</b> Sejas forma ir mainīta, lai emocija būtu stiprāka. Kuras daļas mainījās visvairāk?';}};
+U.$('#neutral').onclick=neutral;mkSl();draw();
+})();
+</script>
+
+</div></div></body></html>
